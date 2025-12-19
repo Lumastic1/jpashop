@@ -56,9 +56,7 @@ class OrderServiceTest {
 
         int orderCount = 11;
 
-        // when
-
-        // then
+        // when // then
         assertThrows(
                 NotEnoughStockException.class,
                 () -> orderService.order(member.getId(), book.getId(), orderCount));
