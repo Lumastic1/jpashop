@@ -14,7 +14,11 @@ public class OrderQueryRepository {
 
     private final EntityManager em;
 
-
+    /**
+     * 컬렉션은 별도로 조회
+     * Query: 루트 1번, 컬렉션 N 번
+     * 단건 조회에서 많이 사용하는 방식
+     */
     public List<OrderQueryDto> findOrderQueryDtos() {
         List<OrderQueryDto> result = findorders();
 
@@ -25,6 +29,9 @@ public class OrderQueryRepository {
         return result;
     }
 
+    /**
+     * 1:N 관계(컬렉션)를 제외한 나머지를 한번에 조회
+     */
     private List<OrderITemQueryDto> findOrderItems(Long orderId) {
         return em.createQuery(
                         "select new jpabook.jpashop.repository.orders.query.OrderITemQueryDto(oi.order.id,i.name,oi.orderPrice,oi.count)" +
@@ -35,6 +42,9 @@ public class OrderQueryRepository {
                 .getResultList();
     }
 
+    /**
+     * 1:N 관계인 orderItems 조회
+     */
     private List<OrderQueryDto> findorders() {
         return em.createQuery(
                 "select new jpabook.jpashop.repository.orders" +
@@ -45,6 +55,12 @@ public class OrderQueryRepository {
         ).getResultList();
     }
 
+    /**
+     * 최적화
+     * Query: 루트 1번, 컬렉션 1번
+     * 데이터를 한꺼번에 처리할 때 많이 사용하는 방식
+     *
+     */
     public List<OrderQueryDto> findAllByDto_optimization() {
         List<OrderQueryDto> result = findorders();
 
@@ -68,15 +84,15 @@ public class OrderQueryRepository {
         return result;
     }
 
+
     public List<OrderFlatDto> findAllByDto_flat() {
         return em.createQuery(
-                "select new" +
-                        " jpabook.jpashop.repository.orders.query" +
-                        ".OrderFlatDto(o.id,o.orderDate,o.status,d.address, i.name,oi.orderPrice,oi.count)" +
-                        " from Order o" +
-                        " join o.member m" +
-                        " join o.delivery d" +
-                        " join o.orderItems oi" +
-                        " join oi.item i", OrderFlatDto.class).getResultList();
+                        "select new jpabook.jpashop.repository.orders.query.OrderFlatDto(o.id, m.name, o.orderDate, o.status, d.address, i.name, oi.orderPrice, oi.count)" +
+                                " from Order o" +
+                                " join o.member m" +
+                                " join o.delivery d" +
+                                " join o.orderItems oi" +
+                                " join oi.item i", OrderFlatDto.class)
+                .getResultList();
     }
 }
